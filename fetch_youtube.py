@@ -1,6 +1,6 @@
 from googleapiclient.discovery import build
-
-API_KEY = "AIzaSyD9FO-TGYGLnbGa8LPd53KapIS06OVZThE"
+import os
+API_KEY = os.getenv("YOUTUBE_API_KEY")
 
 
 def get_youtube_posts():
