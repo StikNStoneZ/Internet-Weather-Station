@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Internet Weather Station</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+<!-- PARTICLES BACKGROUND -->
+<canvas id="particles"></canvas>
+
+<div class="container">
+
+    <!-- LOGO -->
+    <h1>
+        INTERNET<br>
+        WEATHER<br>
+        STATION
+    </h1>
+
+<div class="signature">
+    Developed by StikNStoneZ
+</div>
+
+
+    <!-- OVERALL -->
+    <h2>OVERALL WEATHER:</h2>
+
+    <a href="/details">View Detailed Regions</a>
+
+    <!-- WEATHER BOX (SPLIT VERSION ONLY HERE) -->
+    <div class="weather-box split">
+
+        <!-- LEFT SIDE -->
+        <div class="weather-left">
+
+            <p>
+                CONDITION:
+                <span class="flicker">{{ mood }}</span>
+                <span class="info" data-info="{{ mood_info }}">ⓘ</span>
+            </p>
+
+            <p>
+                TEMPERATURE:
+                <span class="flicker">{{ temp }}°C</span>
+                <span class="info" data-info="{{ heat_info }}">ⓘ</span>
+            </p>
+
+            <p>
+                WIND:
+                <span class="flicker">{{ momentum }}</span>
+                <span class="info" data-info="{{ momentum_info }}">ⓘ</span>
+            </p>
+
+            <p>
+                PRESSURE:
+                <span class="flicker">{{ tension }}</span>
+                <span class="info" data-info="{{ tension_info }}">ⓘ</span>
+            </p>
+
+            <p>
+                VISIBILITY:
+                <span class="flicker">{{ clarity }}</span>
+                <span class="info" data-info="{{ clarity_info }}">ⓘ</span>
+            </p>
+
+            {% if forecast %}
+            <p>
+                OUTLOOK:
+                <span id="outlookValue">{{ forecast }}</span>
+            </p>
+            {% endif %}
+
+        </div>
+
+        <!-- RIGHT SIDE (POETIC TEXT) -->
+        <div class="side-info" id="sideInfo">
+            Loading network whispers...
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ================== FLICKER ================== -->
+<script>
+function randomFlicker() {
+    const elements = document.querySelectorAll('.flicker');
+
+    elements.forEach(el => {
+        // stronger opacity variation
+        el.style.opacity = (0.7 + Math.random() * 0.3);
+
+        // more noticeable jitter
+        const x = (Math.random() - 0.5) * 3;
+        const y = (Math.random() - 0.5) * 3;
+
+        el.style.transform = `translate(${x}px, ${y}px)`;
+
+        // slight blur glitch occasionally
+        if (Math.random() < 0.15) {
+            el.style.filter = "blur(0.5px)";
+        } else {
+            el.style.filter = "none";
+        }
+    });
+}
+
+// faster interval = more intensity
+setInterval(randomFlicker, 500);
+</script>
+
+<!-- ================== POETIC TEXT ================== -->
+<script>
+const sideText = document.getElementById("sideInfo");
+
+function updateSideInfo() {
+    const rawOutlook = document.getElementById("outlookValue")?.innerText || "";
+    const outlook = rawOutlook.toLowerCase();
+
+    const quotes = {
+
+        stable: [
+            "The network hums in quiet agreement.",
+            "All systems move with quiet precision.",
+            "A calm flow settles across the grid.",
+            "Nothing strains. Nothing resists.",
+            "Silence… but not emptiness."
+        ],
+
+        moderate: [
+            "Something is building beneath the surface.",
+            "Signals move with purpose now.",
+            "The system grows restless… but controlled.",
+            "Momentum gathers in quiet waves.",
+            "Not chaos… but no longer calm."
+        ],
+
+        high: [
+            "The network surges with overwhelming force.",
+            "Everything moves at once.",
+            "Signals collide in relentless bursts.",
+            "The system pulses like a racing heart.",
+            "Too much is happening… everywhere."
+        ]
+    };
+
+    let category = "stable";
+
+    if (outlook.includes("moderate")) category = "moderate";
+    else if (outlook.includes("high")) category = "high";
+
+    const selectedQuotes = quotes[category];
+    const random = Math.floor(Math.random() * selectedQuotes.length);
+
+    // fade effect
+    sideText.classList.remove("show");
+
+    setTimeout(() => {
+        sideText.textContent = selectedQuotes[random];
+        sideText.classList.add("show");
+    }, 200);
+}
+
+updateSideInfo();
+setInterval(updateSideInfo, 4000);
+</script>
+
+<!-- ================== PARTICLES ================== -->
+<script>
+window.addEventListener("load", () => {
+
+const canvas = document.getElementById("particles");
+const ctx = canvas.getContext("2d");
+
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+resizeCanvas();
+
+let particles = [];
+
+class Particle {
+    constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+
+        this.size = Math.random() * 4 + 2;
+        this.speedX = (Math.random() - 0.5) * 1;
+        this.speedY = (Math.random() - 0.5) * 1;
+
+        this.opacity = Math.random() * 0.7 + 0.7;
+    }
+
+    update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+
+        if (this.x > canvas.width) this.x = 0;
+        if (this.x < 0) this.x = canvas.width;
+        if (this.y > canvas.height) this.y = 0;
+        if (this.y < 0) this.y = canvas.height;
+    }
+
+    draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+
+        ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = "rgba(255, 255, 255, 0.8)";
+
+        ctx.fill();
+        ctx.shadowBlur = 0;
+    }
+}
+
+function init() {
+    particles = [];
+    for (let i = 0; i < 160; i++) {
+        particles.push(new Particle());
+    }
+}
+
+function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    particles.forEach(p => {
+        p.update();
+        p.draw();
+    });
+
+    requestAnimationFrame(animate);
+}
+
+init();
+animate();
+
+window.addEventListener("resize", () => {
+    resizeCanvas();
+    init();
+});
+
+});
+</script>
+
+</body>
+</html>

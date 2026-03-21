@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Detailed Weather</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+</head>
+
+<body>
+<canvas id="particles"></canvas>
+<div class="container">
+
+    <!-- REDDIT -->
+    <h2>REDDIT WEATHER:</h2>
+
+    <div class="weather-box split">
+
+        <!-- LEFT SIDE -->
+        <div class="weather-left">
+            <p>CONDITION: {{ r_mood }} <span class="info" data-info="{{ r_mood_info }}">ⓘ</span></p>
+            <p>TEMPERATURE: {{ r_temp }}°C <span class="info" data-info="{{ r_heat_info }}">ⓘ</span></p>
+            <p>WIND: {{ r_momentum }} <span class="info" data-info="{{ r_momentum_info }}">ⓘ</span></p>
+            <p>PRESSURE: {{ r_tension }} <span class="info" data-info="{{ r_tension_info }}">ⓘ</span></p>
+            <p>VISIBILITY: {{ r_clarity }} <span class="info" data-info="{{ r_clarity_info }}">ⓘ</span></p>
+        </div>
+
+        <!-- RIGHT SIDE (REDDIT PANEL) -->
+        <div class="side-brand reddit">
+            <img src="/static/reddit.png" alt="Reddit">
+            <p id="redditText" class="flicker">Analyzing Reddit signals...</p>
+        </div>
+
+    </div>
+
+    <!-- YOUTUBE -->
+    <h2>YOUTUBE WEATHER:</h2>
+
+    <div class="weather-box split">
+
+        <!-- LEFT SIDE -->
+        <div class="weather-left">
+            <p>CONDITION: {{ y_mood }} <span class="info" data-info="{{ y_mood_info }}">ⓘ</span></p>
+            <p>TEMPERATURE: {{ y_temp }}°C <span class="info" data-info="{{ y_heat_info }}">ⓘ</span></p>
+            <p>WIND: {{ y_momentum }} <span class="info" data-info="{{ y_momentum_info }}">ⓘ</span></p>
+            <p>PRESSURE: {{ y_tension }} <span class="info" data-info="{{ y_tension_info }}">ⓘ</span></p>
+            <p>VISIBILITY: {{ y_clarity }} <span class="info" data-info="{{ y_clarity_info }}">ⓘ</span></p>
+        </div>
+
+        <!-- RIGHT SIDE (YOUTUBE PANEL) -->
+        <div class="side-brand youtube">
+            <img src="/static/youtube.png" alt="YouTube">
+            <p id="youtubeText" class="flicker">Scanning video currents...</p>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ================== PLATFORM TEXT ================== -->
+<script>
+function updatePlatformText() {
+
+    const redditMood = "{{ r_mood }}".toLowerCase();
+    const youtubeMood = "{{ y_mood }}".toLowerCase();
+
+    const redditText = document.getElementById("redditText");
+    const youtubeText = document.getElementById("youtubeText");
+
+    function getText(mood) {
+        if (mood.includes("heated")) {
+            return "Discussions are heating up rapidly.";
+        } 
+        else if (mood.includes("storm")) {
+            return "Conflict dominates the platform.";
+        } 
+        else if (mood.includes("clear")) {
+            return "Calm threads and quiet conversations.";
+        } 
+        else if (mood.includes("nonsense")) {
+            return "Chaos… but the fun kind.";
+        } 
+        else {
+            return "Signals drift without clear direction.";
+        }
+    }
+
+    redditText.textContent = getText(redditMood);
+    youtubeText.textContent = getText(youtubeMood);
+}
+
+updatePlatformText();
+</script>
+
+<script>
+function randomFlicker() {
+    const elements = document.querySelectorAll('.flicker');
+
+    elements.forEach(el => {
+        el.style.opacity = (0.7 + Math.random() * 0.3);
+
+        const x = (Math.random() - 0.5) * 3;
+        const y = (Math.random() - 0.5) * 3;
+
+        el.style.transform = `translate(${x}px, ${y}px)`;
+
+        if (Math.random() < 0.15) {
+            el.style.filter = "blur(0.5px)";
+        } else {
+            el.style.filter = "none";
+        }
+    });
+}
+
+setInterval(randomFlicker, 500);
+</script>
+
+
+
+
+
+<script>
+window.addEventListener("load", () => {
+
+const canvas = document.getElementById("particles");
+const ctx = canvas.getContext("2d");
+
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+resizeCanvas();
+
+let particles = [];
+
+class Particle {
+    constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+
+        this.size = Math.random() * 4 + 2;
+        this.speedX = (Math.random() - 0.5) * 1;
+        this.speedY = (Math.random() - 0.5) * 1;
+
+        this.opacity = Math.random() * 0.7 + 0.7;
+    }
+
+    update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+
+        if (this.x > canvas.width) this.x = 0;
+        if (this.x < 0) this.x = canvas.width;
+        if (this.y > canvas.height) this.y = 0;
+        if (this.y < 0) this.y = canvas.height;
+    }
+
+    draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+
+        ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = "rgba(255, 255, 255, 0.8)";
+
+        ctx.fill();
+        ctx.shadowBlur = 0;
+    }
+}
+
+function init() {
+    particles = [];
+    for (let i = 0; i < 160; i++) {
+        particles.push(new Particle());
+    }
+}
+
+function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    particles.forEach(p => {
+        p.update();
+        p.draw();
+    });
+
+    requestAnimationFrame(animate);
+}
+
+init();
+animate();
+
+window.addEventListener("resize", () => {
+    resizeCanvas();
+    init();
+});
+
+});
+</script>
+
+</body>
+</html>

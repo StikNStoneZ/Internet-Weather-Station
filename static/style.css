@@ -1,0 +1,286 @@
+/* ================== FONTS ================== */
+
+@font-face {
+    font-family: 'Brunson';
+    src: url('/static/fonts/Brunson.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Bebas';
+    src: url('/static/fonts/Bebas-Regular.ttf') format('truetype');
+}
+
+/* ================== BASE ================== */
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Bebas', sans-serif;
+
+    background: linear-gradient(-45deg, #E8DC6B, #f0e68c, #d4c85a, #f5e98a);
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease infinite;
+}
+
+/* Background animation */
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* ================== LAYOUT ================== */
+
+.container {
+    text-align: center;
+    padding: 40px;
+}
+
+/* ================== LOGO ================== */
+
+h1 {
+    font-family: 'Brunson', sans-serif;
+    font-size: 80px;
+    font-weight: 900;
+    line-height: 0.9;
+    margin-bottom: 40px;
+    letter-spacing: 2px;
+}
+
+/* ================== HEADINGS ================== */
+
+h2 {
+    font-size: 32px;
+    margin-bottom: 20px;
+    letter-spacing: 1px;
+}
+
+/* ================== WEATHER BOX ================== */
+
+.weather-box {
+    background: #EFE6A0;
+    border-radius: 30px;
+    padding: 40px;
+    width: 60%;
+    margin: 30px auto;
+    text-align: left;
+    font-size: 22px;
+
+    /* THIS was missing vibe before */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+}
+
+/* ================== TEXT ================== */
+
+p {
+    margin: 10px 0;
+    letter-spacing: 0.5px;
+}
+
+/* Fix bold overriding font */
+strong, b {
+    font-family: 'Bebas', sans-serif;
+}
+
+/* ================== LINK ================== */
+
+a {
+    color: purple;
+    text-decoration: underline;
+    font-size: 20px;
+}
+
+a:hover {
+    opacity: 0.7;
+}
+
+.info {
+    margin-left: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    border: 1px solid black;
+    border-radius: 50%;
+    padding: 2px 6px;
+    display: inline-block;
+    position: relative;
+}
+
+/* Tooltip */
+.info::after {
+    content: attr(data-info);
+    position: absolute;
+    bottom: 140%;
+    left: 50%;
+    transform: translateX(-50%);
+
+    background: black;
+    color: white;
+    padding: 10px;
+    border-radius: 10px;
+
+    width: 220px;
+    font-size: 14px;
+
+    opacity: 0;
+    pointer-events: none;
+    transition: 0.2s;
+}
+
+.info:hover::after {
+    opacity: 1;
+}
+
+/* flickering values */
+
+.flicker {
+    display: inline-block;
+}
+
+/* particles */
+
+#particles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+    z-index: 0;
+    pointer-events: none;
+}
+
+.container {
+    position: relative;
+    z-index: 1;
+}
+.weather-box.split {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.weather-left {
+    width: 60%;
+}
+
+.side-info {
+    width: 35%;
+    padding-left: 30px;
+    border-left: 2px solid rgba(0,0,0,0.2);
+
+    font-style: italic;
+    letter-spacing: 1px;  /* ⚠️ FIXED BUG (you had '1 px') */
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+
+    font-size: 26px;
+    line-height: 1.6;
+
+    transform: translateY(25px);  /* 🔥 push DOWN */
+
+    opacity: 0;
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.side-info.show {
+    opacity: 0.85;
+    transform: translateY(0);
+}
+.side-info.show {
+    opacity: 0.85;
+}
+
+/* ================== SIDE BRAND (DETAILS PAGE) ================== */
+
+.side-brand {
+    width: 35%;
+    padding-left: 30px;
+    border-left: 2px solid rgba(0,0,0,0.2);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+}
+
+/* Logos */
+.side-brand img {
+    width: 70px;
+    margin-bottom: 15px;
+}
+
+/* Text under logo */
+.side-brand p {
+    font-size: 20px;
+    line-height: 1.5;
+    opacity: 0.8;
+}
+
+/* Optional subtle platform tint */
+.side-brand.reddit img {
+    filter: drop-shadow(0 0 6px rgba(255, 69, 0, 0.4));
+}
+
+.side-brand.youtube img {
+    filter: drop-shadow(0 0 6px rgba(255, 0, 0, 0.4));
+}
+
+/* ================== SIGNATURE ================== */
+
+.signature {
+    position: absolute;
+    font-family: "Special Elite";
+    right: 20%;
+    top: 340px;   /* 🔥 push it DOWN properly */
+
+    font-size: 14px;
+    opacity: 0.7;
+    letter-spacing: 1px;
+}
+
+@media (max-width: 768px) {
+
+    /* stack instead of side-by-side */
+    .weather-box.split {
+        flex-direction: column;
+    }
+
+    .weather-left,
+    .side-info,
+    .side-brand {
+        width: 100%;
+        border-left: none;
+        padding-left: 0;
+        margin-top: 20px;
+        text-align: center;
+    }
+
+    /* smaller title */
+    h1 {
+        font-size: 50px;
+    }
+
+    /* smaller poetic text */
+    .side-info {
+        font-size: 20px;
+    }
+
+    /* logo size adjust */
+    .side-brand img {
+        width: 50px;
+    }
+
+    /* FIX SIGNATURE */
+    .signature {
+        position: static;
+        margin-top: 20px;
+        text-align: center;
+    }
+
+}
