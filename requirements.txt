@@ -1,1 +1,6 @@
+Flask
 requests
+vaderSentiment
+google-api-python-client
+pytrends
+gunicorn
