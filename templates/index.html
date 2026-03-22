@@ -74,7 +74,7 @@
 
         </div>
 
-        <!-- RIGHT SIDE (POETIC TEXT) -->
+        <!-- RIGHT SIDE -->
         <div class="side-info" id="sideInfo">
             Loading network whispers...
         </div>
@@ -92,16 +92,16 @@ function randomFlicker() {
     const elements = document.querySelectorAll('.flicker');
 
     elements.forEach(el => {
-        // stronger opacity variation
+       
         el.style.opacity = (0.7 + Math.random() * 0.3);
 
-        // more noticeable jitter
+        
         const x = (Math.random() - 0.5) * 3;
         const y = (Math.random() - 0.5) * 3;
 
         el.style.transform = `translate(${x}px, ${y}px)`;
 
-        // slight blur glitch occasionally
+        
         if (Math.random() < 0.15) {
             el.style.filter = "blur(0.5px)";
         } else {
@@ -114,7 +114,7 @@ function randomFlicker() {
 setInterval(randomFlicker, 500);
 </script>
 
-<!-- ================== POETIC TEXT ================== -->
+<!-- ================= the random text on the side ================ -->
 <script>
 const sideText = document.getElementById("sideInfo");
 
@@ -125,7 +125,7 @@ function updateSideInfo() {
     const quotes = {
 
         stable: [
-            "The network hums in quiet agreement.",
+            "The network appears quiet... 'appears'.",
             "All systems move with quiet precision.",
             "A calm flow settles across the grid.",
             "Nothing strains. Nothing resists.",
