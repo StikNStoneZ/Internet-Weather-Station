@@ -72,56 +72,41 @@ def get_clarity_info(clarity):
 def home():
     global cache, last_fetch
 
-    # Refresh data every 30 seconds
+    # refresh every 30 sec
     if time.time() - last_fetch > 30:
 
         try:
-            # Reddit
-            try:
-                reddit_posts = get_reddit_posts()
-            except Exception as e:
-                print("Reddit failed:", e)
-                reddit_posts = []
+            reddit_posts = get_reddit_posts()
+            youtube_posts = get_youtube_posts()
 
-            # YouTube
-            try:
-                youtube_posts = get_youtube_posts()
-            except Exception as e:
-                print("YouTube failed:", e)
-                youtube_posts = []
-
-            # Combine
             all_posts = reddit_posts + youtube_posts
 
-            # Analyze
             sentiments = analyze_posts(all_posts)
-
-            # Weather
             weather = calculate_weather(sentiments, all_posts)
 
-            # Save to cache
+            # ✅ ONLY update cache if EVERYTHING worked
             cache = {
-                "mood": weather.get("condition", "Unknown"),
-                "temp": weather.get("temperature", 0),
-                "momentum": weather.get("wind", "N/A"),
-                "tension": weather.get("pressure", "N/A"),
-                "clarity": weather.get("visibility", "N/A"),
+                "mood": weather.get("condition"),
+                "temp": weather.get("temperature"),
+                "momentum": weather.get("wind"),
+                "tension": weather.get("pressure"),
+                "clarity": weather.get("visibility"),
             }
 
             last_fetch = time.time()
 
         except Exception as e:
-            print("Main fetch failed:", e)
-            # Keep old cache (important)
+            print("Fetch failed:", e)
+            # ❌ DO NOTHING → keep old cache
 
-    # First run fallback
+    # first ever load fallback
     if not cache:
         cache = {
-            "mood": "Loading...",
+            "mood": "Booting...",
             "temp": 0,
-            "momentum": "N/A",
-            "tension": "N/A",
-            "clarity": "N/A",
+            "momentum": "Warming up",
+            "tension": "Initializing",
+            "clarity": "Loading"
         }
 
     return render_template("index.html", **cache)
