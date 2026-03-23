@@ -1,42 +1,52 @@
 from googleapiclient.discovery import build
 import os
+
 API_KEY = os.getenv("YOUTUBE_API_KEY")
 
-
 def get_youtube_posts():
-    youtube = build("youtube", "v3", developerKey=API_KEY)
 
-    request = youtube.videos().list(
-        part="snippet,statistics",
-        chart="mostPopular",
-        maxResults=50,
-        regionCode="IN"
-    )
+    if not API_KEY:
+        print("No YouTube API key")
+        return []
 
-    response = request.execute()
+    try:
+        youtube = build("youtube", "v3", developerKey=API_KEY)
 
-    posts = []
+        request = youtube.videos().list(
+            part="snippet,statistics",
+            chart="mostPopular",
+            maxResults=50,
+            regionCode="IN"
+        )
 
-    for item in response["items"]:
-        title = item["snippet"]["title"]
-        stats = item.get("statistics", {})
+        response = request.execute()
 
-        likes = int(stats.get("likeCount", 0))
-        comments = int(stats.get("commentCount", 0))
-        views = int(stats.get("viewCount", 1))  # avoid division by 0
+        posts = []
 
-        hype_score = (likes + comments) / views
+        for item in response.get("items", []):
+            snippet = item.get("snippet", {})
+            stats = item.get("statistics", {})
 
-        posts.append({
-            "text": title,
-            "likes": likes,
-            "comments": comments,
-            "views": views,
-            "hype": hype_score
-        })
+            title = snippet.get("title", "No title")
 
-    # 🔥 SORT BY HYPE (NOT popularity)
-    posts.sort(key=lambda x: x["hype"], reverse=True)
+            likes = int(stats.get("likeCount", 0))
+            comments = int(stats.get("commentCount", 0))
+            views = int(stats.get("viewCount", 1))
 
-    # take top 25 hype videos
-    return posts[:25]
+            hype_score = (likes + comments) / views
+
+            posts.append({
+                "text": title,
+                "likes": likes,
+                "comments": comments,
+                "views": views,
+                "hype": hype_score
+            })
+
+        posts.sort(key=lambda x: x["hype"], reverse=True)
+
+        return posts[:25]
+
+    except Exception as e:
+        print("YouTube failed:", e)
+        return []
