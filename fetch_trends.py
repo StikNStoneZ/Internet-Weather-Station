@@ -1,22 +1,32 @@
 import requests
 import xml.etree.ElementTree as ET
 
-
 def get_trending_searches():
     url = "https://trends.google.com/trending/rss?geo=IN"
 
-    response = requests.get(url)
+    try:
+        response = requests.get(url, timeout=5)
 
-    root = ET.fromstring(response.content)
+        # if request fails
+        if response.status_code != 200:
+            print("Trends HTTP error:", response.status_code)
+            return []
 
-    trends = []
+        root = ET.fromstring(response.content)
 
-    for item in root.iter("item"):
-        title = item.find("title").text
+        trends = []
 
-        trends.append({
-            "text": title,
-            "source": "trends"
-        })
+        for item in root.iter("item"):
+            title = item.find("title")
 
-    return trends[:20]
+            if title is not None:
+                trends.append({
+                    "text": title.text,
+                    "source": "trends"
+                })
+
+        return trends[:20]
+
+    except Exception as e:
+        print("Trends failed:", e)
+        return []
