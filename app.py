@@ -1,11 +1,14 @@
 from flask import Flask, render_template
-
+import time
 from fetch_reddit import get_reddit_posts
 from fetch_youtube import get_youtube_posts
 from fetch_trends import get_trending_searches
 
 from analyze import analyze_posts
 from weather import calculate_weather, process_trends
+
+cache = {}
+last_fetch = 0
 
 app = Flask(__name__)
 
@@ -67,51 +70,61 @@ def get_clarity_info(clarity):
 
 @app.route("/")
 def home():
-    print("Fetching Reddit...")
-    reddit_posts = get_reddit_posts()
+    global cache, last_fetch
 
-    print("Fetching YouTube...")
-    youtube_posts = get_youtube_posts()
+    # Refresh data every 30 seconds
+    if time.time() - last_fetch > 30:
 
-    print("Fetching Google Trends...")
-    trends = get_trending_searches()
+        try:
+            # Reddit
+            try:
+                reddit_posts = get_reddit_posts()
+            except Exception as e:
+                print("Reddit failed:", e)
+                reddit_posts = []
 
-    # Combine posts
-    all_posts = reddit_posts + youtube_posts
+            # YouTube
+            try:
+                youtube_posts = get_youtube_posts()
+            except Exception as e:
+                print("YouTube failed:", e)
+                youtube_posts = []
 
-    # Analyze sentiment
-    sentiments = analyze_posts(all_posts)
+            # Combine
+            all_posts = reddit_posts + youtube_posts
 
-    # Generate weather
-    weather = calculate_weather(sentiments, all_posts)
+            # Analyze
+            sentiments = analyze_posts(all_posts)
 
-    # Trends → forecast
-    alert, forecast = process_trends(trends)
+            # Weather
+            weather = calculate_weather(sentiments, all_posts)
 
-    # ✅ Extract values (THIS FIXES YOUR ERROR)
-    mood = weather["condition"]
-    temp = weather["temperature"]
-    momentum = weather["wind"]
-    tension = weather["pressure"]
-    clarity = weather["visibility"]
+            # Save to cache
+            cache = {
+                "mood": weather.get("condition", "Unknown"),
+                "temp": weather.get("temperature", 0),
+                "momentum": weather.get("wind", "N/A"),
+                "tension": weather.get("pressure", "N/A"),
+                "clarity": weather.get("visibility", "N/A"),
+            }
 
-    return render_template(
-        "index.html",
+            last_fetch = time.time()
 
-        mood=mood,
-        temp=temp,
-        momentum=momentum,
-        tension=tension,
-        clarity=clarity,
-        forecast=forecast,
+        except Exception as e:
+            print("Main fetch failed:", e)
+            # Keep old cache (important)
 
-        # Tooltip data
-        mood_info=get_mood_info(mood),
-        heat_info=get_heat_info(temp),
-        momentum_info=get_momentum_info(momentum),
-        tension_info=get_tension_info(tension),
-        clarity_info=get_clarity_info(clarity)
-    )
+    # First run fallback
+    if not cache:
+        cache = {
+            "mood": "Loading...",
+            "temp": 0,
+            "momentum": "N/A",
+            "tension": "N/A",
+            "clarity": "N/A",
+        }
+
+    return render_template("index.html", **cache)
 
 
 # ================= DETAILS PAGE =================
