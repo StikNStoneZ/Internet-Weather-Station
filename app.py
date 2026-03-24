@@ -1,5 +1,6 @@
 from flask import Flask, render_template
 import time
+
 from fetch_reddit import get_reddit_posts
 from fetch_youtube import get_youtube_posts
 from fetch_trends import get_trending_searches
@@ -72,7 +73,6 @@ def get_clarity_info(clarity):
 def home():
     global cache, last_fetch
 
-    # refresh every 30 sec
     if time.time() - last_fetch > 30:
 
         try:
@@ -84,29 +84,41 @@ def home():
             sentiments = analyze_posts(all_posts)
             weather = calculate_weather(sentiments, all_posts)
 
-            # ✅ ONLY update cache if EVERYTHING worked
+            # ✅ FIX: include tooltip info
             cache = {
                 "mood": weather.get("condition"),
                 "temp": weather.get("temperature"),
                 "momentum": weather.get("wind"),
                 "tension": weather.get("pressure"),
                 "clarity": weather.get("visibility"),
+
+                # 🔥 TOOLTIP DATA (THIS WAS MISSING)
+                "mood_info": get_mood_info(weather.get("condition")),
+                "heat_info": get_heat_info(weather.get("temperature")),
+                "momentum_info": get_momentum_info(weather.get("wind")),
+                "tension_info": get_tension_info(weather.get("pressure")),
+                "clarity_info": get_clarity_info(weather.get("visibility")),
             }
 
             last_fetch = time.time()
 
         except Exception as e:
             print("Fetch failed:", e)
-            # ❌ DO NOTHING → keep old cache
 
-    # first ever load fallback
     if not cache:
         cache = {
             "mood": "Booting...",
             "temp": 0,
             "momentum": "Warming up",
             "tension": "Initializing",
-            "clarity": "Loading"
+            "clarity": "Loading",
+
+            # fallback tooltip data
+            "mood_info": "",
+            "heat_info": "",
+            "momentum_info": "",
+            "tension_info": "",
+            "clarity_info": "",
         }
 
     return render_template("index.html", **cache)
@@ -125,14 +137,12 @@ def details():
     reddit_weather = calculate_weather(reddit_sentiments, reddit_posts)
     youtube_weather = calculate_weather(youtube_sentiments, youtube_posts)
 
-    # 🔥 Extract reddit values
     r_mood = reddit_weather["condition"]
     r_temp = reddit_weather["temperature"]
     r_momentum = reddit_weather["wind"]
     r_tension = reddit_weather["pressure"]
     r_clarity = reddit_weather["visibility"]
 
-    # 🔥 Extract youtube values
     y_mood = youtube_weather["condition"]
     y_temp = youtube_weather["temperature"]
     y_momentum = youtube_weather["wind"]
